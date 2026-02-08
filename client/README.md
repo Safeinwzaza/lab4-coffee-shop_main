@@ -1,6 +1,6 @@
 <<<<<<< HEAD
 # nv-webblog68
-Passakorn Samakal
+Nuttakit Ninboot
 CSIT
 =======
 # Vue 3 + Vite
