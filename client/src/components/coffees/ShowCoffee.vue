@@ -1,38 +1,34 @@
 <template>
   <div>
-    <h1>รายละเอียดเมนูกาแฟ</h1>
-    <p>id: {{ coffee.id }}</p>
-    <p>ชื่อเมนู: {{ coffee.name }}</p>
-    <p>ราคา: {{ coffee.price }}</p>
-    <p>ประเภท: {{ coffee.type }}</p>
-    <p>สถานะ: {{ coffee.status }}</p>
-    <p>
-      <button @click="navigateTo('/coffees')">กลับ</button>
-    </p>
+    <h1>Show Coffee</h1>
+
+    <div v-if="coffee">
+      <p>id: {{ coffee.id }}</p>
+      <p>ชื่อเมนู: {{ coffee.name }}</p>
+      <p>ราคา: {{ coffee.price }}</p>
+      <p>ประเภท: {{ coffee.type }}</p>
+      <p>รายละเอียด: {{ coffee.description }}</p>
+    </div>
+
+    <div v-else>
+      Loading...
+    </div>
   </div>
 </template>
 
 <script>
-import CoffeeService from '@/services/CoffeeService';
+import CoffeesService from '../../services/CoffeesService'
 
 export default {
   data () {
     return {
-      coffee: {}
+      coffee: null
     }
   },
+
   async created () {
-    try {
-      var coffeeId = this.$route.params.coffeeId
-      this.coffee = (await CoffeeService.show(coffeeId)).data
-    } catch (err) {
-      console.log(err)
-    }
-  },
-  methods: {
-    navigateTo (route) {
-      this.$router.push(route)
-    }
+    const coffeeId = this.$route.params.coffeeId
+    this.coffee = (await CoffeesService.show(coffeeId)).data
   }
 }
 </script>

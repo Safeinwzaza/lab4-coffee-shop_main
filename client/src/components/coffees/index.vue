@@ -1,25 +1,61 @@
 <template>
   <div>
-    <h2>รายการเมนูกาแฟ</h2>
-    <p><button @click="navigateTo('/coffee/create')">สร้างเมนูใหม่</button></p>
-    <div v-for="coffee in coffees" :key="coffee.id">
-      <p>id: {{ coffee.id }}</p>
-      <p>ชื่อเมนู: {{ coffee.name }}</p>
-      <p>ราคา: {{ coffee.price }}</p>
-      <p>ประเภท: {{ coffee.type }}</p>
-      <p>สถานะ: {{ coffee.status }}</p>
-      <p>
-        <button @click="navigateTo('/coffee/'+coffee.id)">ดูข้อมูล</button>
-        <button @click="navigateTo('/coffee/edit/'+coffee.id)">แก้ไข</button>
-        <button @click="deleteCoffee(coffee)">ลบข้อมูล</button>
-      </p>
-      <hr>
+    <h1>Get All Coffees</h1>
+
+    <div>จำนวนเมนู {{ coffees.length }}</div>
+
+    <div v-if="coffees.length > 0">
+      <div
+        v-for="coffee in coffees"
+        :key="coffee.id"
+        style="margin-bottom: 15px;"
+        class="coffee-item"
+      >
+        <div>id: {{ coffee.id }}</div>
+
+        <!-- ✅ แสดงรูปวงกลมหน้าชื่อ -->
+        <div>
+          <img
+            v-if="coffee.image"
+            :src="`http://localhost:8081/assets/uploads/${coffee.image}`"
+            class="coffee-thumb"
+          />
+          ชื่อเมนู: {{ coffee.name }}
+        </div>
+
+        <div>ราคา: {{ coffee.price }}</div>
+        <div>ประเภท: {{ coffee.type }}</div>
+        <div>สถานะ: {{ coffee.status }}</div>
+
+        <p>
+          <button @click="navigateTo('/coffee/' + coffee.id)">
+            ดูรายละเอียด
+          </button>
+
+          <template v-if="isLoggedIn">
+            <button @click="navigateTo('/coffee/edit/' + coffee.id)">
+              แก้ไข
+            </button>
+
+            <button @click="deleteCoffee(coffee.id)">
+              ลบเมนู
+            </button>
+          </template>
+        </p>
+
+        <hr />
+      </div>
+    </div>
+
+    <div v-else>
+      ยังไม่มีเมนูกาแฟ
     </div>
   </div>
 </template>
 
 <script>
-import CoffeeService from '@/services/CoffeeService';
+import CoffeesService from '../../services/CoffeesService'
+import { useAuthenStore } from '../../stores/authen'
 
 export default {
   data () {
@@ -27,27 +63,54 @@ export default {
       coffees: []
     }
   },
+
   async created () {
-    this.coffees = (await CoffeeService.index()).data
+    this.refreshData()
   },
+
+  computed: {
+    isLoggedIn () {
+      const authenStore = useAuthenStore()
+      return authenStore.isUserLoggedIn
+    }
+  },
+
   methods: {
     navigateTo (route) {
       this.$router.push(route)
     },
-    async deleteCoffee (coffee) {
-      let result = confirm("คุณต้องการลบข้อมูลใช่หรือไม่?")
+
+    async deleteCoffee (coffeeId) {
+      const result = confirm('Want to delete?')
       if (result) {
         try {
-          await CoffeeService.delete(coffee)
+          await CoffeesService.delete(coffeeId)
           this.refreshData()
         } catch (err) {
           console.log(err)
         }
       }
     },
+
     async refreshData () {
-      this.coffees = (await CoffeeService.index()).data
+      this.coffees = (await CoffeesService.index()).data
     }
   }
 }
 </script>
+
+<style scoped>
+.coffee-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+.coffee-item {
+  display: flex;
+  flex-direction: column;
+}
+</style>

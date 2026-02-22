@@ -1,6 +1,7 @@
 <template>
   <div class="coffee-navbar">
     <ul class="nav">
+
       <!-- เมนูกาแฟ (ทุกคนเห็น) -->
       <li>
         <router-link to="/coffees">
@@ -8,10 +9,23 @@
         </router-link>
       </li>
 
-      <!-- Order (ถ้ามี route ก็ใช้ได้เลย) -->
+      <!-- Order -->
       <li>
         <router-link to="/orders">
           Order
+        </router-link>
+      </li>
+
+      <!-- แสดงเมื่อ Login แล้ว -->
+      <li v-if="isLoggedIn">
+        <router-link to="/blogs">
+          Blog
+        </router-link>
+      </li>
+
+      <li v-if="isLoggedIn">
+        <router-link to="/users">
+          User
         </router-link>
       </li>
 
@@ -28,6 +42,7 @@
           Logout
         </a>
       </li>
+
     </ul>
 
     <div class="clearfix"></div>
@@ -35,7 +50,7 @@
 </template>
 
 <script>
-import { useAuthenStore } from '@/stores/authen';
+import { useAuthenStore } from '@/stores/authen'
 
 export default {
   name: 'CoffeeHeader',
@@ -57,7 +72,7 @@ export default {
 
 <style scoped>
 .coffee-navbar {
-  background-color: #346f2f; /* น้ำตาลกาแฟ ☕ */
+  background-color: #6f4e37;
   width: 100%;
   padding: 10px 0;
 }
@@ -81,11 +96,11 @@ export default {
 }
 
 .coffee-navbar .nav li a:hover {
-  background-color: #2b8b2e;
+  background-color: #8b5a2b;
 }
 
 .coffee-navbar .nav li a.router-link-active {
-  background-color: #4da02d;
+  background-color: #a0522d;
 }
 
 .clearfix {
