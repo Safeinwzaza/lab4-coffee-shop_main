@@ -1,35 +1,22 @@
 const multer = require('multer')
 const path = require('path')
+const fs = require('fs')
 
-// กำหนดที่เก็บไฟล์
+// ensure uploads folder exists at server/public/uploads
+const uploadDir = path.join(__dirname, '..', '..', 'public', 'uploads')
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true })
+}
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../../public/uploads/coffee'))
+    cb(null, uploadDir)
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname))
+    cb(null, Date.now() + '-' + file.originalname)
   }
 })
 
-// กรองเฉพาะไฟล์รูป
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png|gif/
-  const extname = allowedTypes.test(
-    path.extname(file.originalname).toLowerCase()
-  )
-  const mimetype = allowedTypes.test(file.mimetype)
-
-  if (extname && mimetype) {
-    cb(null, true)
-  } else {
-    cb(new Error('Only image files are allowed'))
-  }
-}
-
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 2 * 1024 * 1024 },
-  fileFilter: fileFilter
-}).single('image')
+const upload = multer({ storage: storage })
 
 module.exports = upload

@@ -1,100 +1,56 @@
 <template>
   <div>
-    <h1>Create Coffee</h1>
+    <h1>สร้างเมนูกาแฟ</h1>
+    <form v-on:submit.prevent="createCoffee" style="max-width:420px;margin:0 auto;text-align:center">
+      <p>ชื่อเมนู: <input type="text" v-model="coffee.name"></p>
+      <p>ราคา: <input type="text" v-model="coffee.price"></p>
+      <p>ประเภท: <select v-model="coffee.type"><option>hot</option><option>iced</option></select></p>
+      <p>สถานะ: <select v-model="coffee.status"><option>มีจำหน่าย</option><option>หมด</option></select></p>
+      <p>รายละเอียด</p>
+      <p><textarea v-model="coffee.description" rows="3" style="width:100%"></textarea></p>
 
-    <form @submit.prevent="createCoffee">
-      <div>
-        <label>ชื่อเมนู</label><br />
-        <input v-model="coffee.name" type="text" required />
+      <div style="margin-top:12px">
+        <Upload @uploaded="onUploaded" />
       </div>
 
-      <div>
-        <label>ราคา</label><br />
-        <input v-model.number="coffee.price" type="number" required />
+      <div v-if="coffee.image" style="margin-top:18px;text-align:center">
+        <img :src="coffee.image" alt="preview" style="width:200px;height:200px;object-fit:cover;border-radius:50%;" />
       </div>
 
-      <div>
-        <label>ประเภท</label><br />
-        <select v-model="coffee.type" required>
-          <option value="">-- เลือกประเภท --</option>
-          <option value="hot">Hot</option>
-          <option value="iced">Iced</option>
-          <option value="frappe">Frappe</option>
-        </select>
-      </div>
-
-      <div>
-        <label>สถานะ</label><br />
-        <select v-model="coffee.status" required>
-          <option value="">-- เลือกสถานะ --</option>
-          <option value="มีจำหน่าย">มีจำหน่าย</option>
-          <option value="หมด">หมด</option>
-        </select>
-      </div>
-
-      <div>
-        <label>รายละเอียด</label><br />
-        <textarea v-model="coffee.description"></textarea>
-      </div>
-
-      <!-- ✅ เพิ่ม Upload รูป -->
-      <div>
-        <label>อัปโหลดรูปกาแฟ</label>
-        <upload-image @uploaded="onUploaded"></upload-image>
-      </div>
-
-      <br />
-
-      <button type="submit">บันทึกเมนู</button>
-      <button type="button" @click="navigateTo('/coffees')">
-        ยกเลิก
-      </button>
+      <p style="margin-top:18px"><button type="submit">บันทึกเมนู</button> <button type="button" @click="$router.back()">ยกเลิก</button></p>
     </form>
   </div>
 </template>
 
 <script>
-import CoffeesService from '../../services/CoffeesService'
-import UploadImage from '../../components/Utils/Upload.vue'  // ✅ import
+import Upload from '@/components/Upload.vue';
+import CoffeeService from '@/services/CoffeeService';
 
 export default {
-  components: {
-    UploadImage   // ✅ register component
-  },
-
+  components: { Upload },
   data () {
     return {
       coffee: {
         name: '',
-        price: null,
-        type: '',
-        status: '',
+        price: '',
+        type: 'hot',
+        status: 'มีจำหน่าย',
         description: '',
-        image: 'null'   // ✅ เพิ่ม field image
+        image: ''
       }
     }
   },
-
   methods: {
-
-    // ✅ รับชื่อไฟล์จาก Upload.vue
-    onUploaded (filename) {
-      this.coffee.image = filename
-      console.log('Coffee image:', filename)
+    onUploaded (imagePath) {
+      this.coffee.image = imagePath
     },
-
     async createCoffee () {
       try {
-        await CoffeesService.post(this.coffee)
-        alert('เพิ่มเมนูกาแฟเรียบร้อย')
-        this.$router.push('/coffees')
+        await CoffeeService.post(this.coffee)
+        this.$router.push({ name: 'coffees' })
       } catch (err) {
         console.log(err)
       }
-    },
-
-    navigateTo (route) {
-      this.$router.push(route)
     }
   }
 }

@@ -1,99 +1,57 @@
 <template>
   <div>
-    <h1>Edit Coffee</h1>
-
-    <!-- แสดงฟอร์มเมื่อโหลดข้อมูลมาแล้ว -->
-    <div v-if="coffee">
-
+    <h1>แก้ไขเมนูกาแฟ</h1>
+    <form v-on:submit.prevent="editCoffee">
+      <p>ชื่อเมนู: <input type="text" v-model="coffee.name"></p>
+      <p>ราคา: <input type="text" v-model="coffee.price"></p>
+      <p>ประเภท: <input type="text" v-model="coffee.type"></p>
+      <p>สถานะ: <input type="text" v-model="coffee.status"></p>
+      <p>รูปภาพเดิม:</p>
       <p>
-        Name:
-        <input v-model="coffee.name" type="text" />
+        <img v-if="coffee.image" :src="coffee.image" alt="preview" style="width:80px;height:80px;object-fit:cover;border-radius:8px;margin-bottom:8px;" />
       </p>
-
-      <p>
-        Price:
-        <input v-model.number="coffee.price" type="number" />
-      </p>
-
-      <p>
-        Type:
-        <select v-model="coffee.type">
-          <option value="hot">hot</option>
-          <option value="iced">iced</option>
-          <option value="frappe">frappe</option>
-        </select>
-      </p>
-
-      <p>
-        Status:
-        <select v-model="coffee.status">
-          <option value="มีจำหน่าย">มีจำหน่าย</option>
-          <option value="หมด">หมด</option>
-        </select>
-      </p>
-
-      <p>
-        Description:
-        <textarea v-model="coffee.description"></textarea>
-      </p>
-
-      <!-- ✅ แสดงรูปเดิม -->
-      <div v-if="coffee.image" style="margin-bottom:10px;">
-        <p>รูปปัจจุบัน:</p>
-        <img
-          :src="`http://localhost:8081/assets/uploads/${coffee.image}`"
-          style="width:120px;height:120px;border-radius:10px;object-fit:cover;"
-        />
-      </div>
-
-      <!-- ✅ Upload รูปใหม่ -->
-      <upload-image @uploaded="onUploaded" />
-
-      <br />
-
-      <p>
-        <button @click="updateCoffee">บันทึกการแก้ไข</button>
-      </p>
-
-    </div>
-
-    <div v-else>
-      Loading...
-    </div>
+      <p>อัปโหลดรูปใหม่ (ถ้าต้องการ):</p>
+      <Upload @uploaded="onUploaded" />
+      <p><button type="submit">แก้ไขเมนู</button></p>
+    </form>
   </div>
 </template>
 
 <script>
-import CoffeesService from '../../services/CoffeesService'
-import UploadImage from '../Utils/Upload.vue'
+import Upload from '@/components/Upload.vue';
+import CoffeeService from '@/services/CoffeeService';
 
 export default {
-  components: {
-    UploadImage
-  },
-
+  components: { Upload },
   data () {
     return {
-      coffee: null
+      coffee: {
+        name: '',
+        price: '',
+        type: '',
+        status: '',
+        image: ''
+      }
     }
   },
-
   async created () {
-    const coffeeId = this.$route.params.coffeeId
-    this.coffee = (await CoffeesService.show(coffeeId)).data
+    try {
+      var coffeeId = this.$route.params.coffeeId
+      this.coffee = (await CoffeeService.show(coffeeId)).data
+    } catch (err) {
+      console.log(err)
+    }
   },
-
   methods: {
-
-    // ✅ รับชื่อไฟล์จาก Upload.vue
-    onUploaded (filename) {
-      this.coffee.image = filename
+    onUploaded (imagePath) {
+      this.coffee.image = imagePath
     },
-
-    async updateCoffee () {
+    async editCoffee () {
       try {
-        await CoffeesService.put(this.coffee)
-        this.$router.push('/coffees')
+        await CoffeeService.put(this.coffee)
+        this.$router.push({
+          name: 'coffees'
+        })
       } catch (err) {
         console.log(err)
       }
